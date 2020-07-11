@@ -42,3 +42,4 @@ Recovered: ${data[0][0].recovered}
 
 bot.hears('hi', (ctx) => ctx.reply('Hey there'));
 bot.launch();
+console.log('Bot is tarted...');
