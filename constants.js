@@ -39,7 +39,7 @@ saint-barthelemy, saint-kitts-and-nevis, saint-lucia, saint-martin, saint-vincen
 
 taiwan, tanzania, thailand, timor-leste, togo, trinidad-and-tobago, tunisia, turkey, turks-and-caicos-islands
 
-uganda uk ukraine united-arab-emirates uruguay us uzbekistan
+uganda, uk, ukraine, united-arab-emirates, uruguay, us, uzbekistan
 
 venezuela, viet-nam
 

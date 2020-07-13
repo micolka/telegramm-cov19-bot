@@ -21,6 +21,7 @@
     "prettier": "^2.0.5"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "covid19-api": "^1.2.1",
     "dotenv": "^8.2.0",
     "telegraf": "^3.38.0"
