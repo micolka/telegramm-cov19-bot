@@ -4,59 +4,72 @@ const { Telegraf } = require('telegraf');
 const api = require('covid19-api');
 const Markup = require('telegraf/markup');
 const COUNTRIES_LIST = require('./constants');
+const {getWeatherData, getCovidData} = require('./data-func')
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
+
+
 bot.start((ctx) =>
   ctx.reply(
     `
 Welcome, ${ctx.message.from.first_name}!
-Here you can get word COVID-19 statistics.
-Just send me any country you want.
-Type /help to get full list of countries.
+Whanna some stats? Choose your destiny!
 `,
     Markup.keyboard([
-      ['us', 'russia'],
-      ['belarus', 'poland'],
+      ['Covid', 'weather'],
+      ['Belarus', '/help'],
     ])
       .resize()
       .extra()
   )
 );
+
 bot.help((ctx) => ctx.reply(COUNTRIES_LIST));
 
 bot.on('text', async (ctx) => {
   let data = {};
-  const country = ctx.message.text;
-  if (COUNTRIES_LIST.includes(country.toLowerCase())) {
+  const ctxText = ctx.message.text;
+
+  if (ctxText === 'weather') {
+    ctx.reply(`Choose the city`, 
+    Markup.keyboard([
+      ['Orsha', 'Minsk'],
+      ['/back', '/list'],
+    ])
+      .resize()
+      .extra() );
+  } 
+
+  else if (ctxText === 'Covid') {
+    ctx.reply(`Choose the country`, 
+    Markup.keyboard([
+      ['Russia', 'Belarus'],
+      ['/back', '/list'],
+    ])
+      .resize()
+      .extra() );
+  }
+  
+  else if (COUNTRIES_LIST.includes(ctxText.toLowerCase())) {
     try {
-      data = await api.getReportsByCountries(country);
-      const formatData = `
-  Country: ${data[0][0].country}
-  Cases: ${data[0][0].cases}
-  Deaths: ${data[0][0].deaths}
-  Recovered: ${data[0][0].recovered}
-  `;
-      ctx.reply(formatData);
+      data = await api.getReportsByCountries(ctxText);
+      ctx.reply(getCovidData(data));
     } catch (e) {
-      ctx.reply(`Error. Can't find info about ${country}!`);
+      ctx.reply(`Error. Can't find info about ${ctxText}!`);
     }
-  } else {
+  } 
+  
+  else {
     const params = {
       access_key: process.env.WEATHER_API_KEY,
-      query: country,
+      query: ctxText,
     };
     axios
       .get('http://api.weatherstack.com/current', { params })
       .then((response) => {
-        const weatherData = response.data;
-        const formatData = `
-Temperature: ${weatherData.current.temperature} °C
-Feels like: ${weatherData.current.feelslike} °C
-Description: ${weatherData.current.weather_descriptions}
-Wind speed: ${weatherData.current.wind_speed} m/s
-  `;
+        const formatData = getWeatherData(response.data);
         ctx.reply(formatData);
-        ctx.replyWithPhoto({ url: weatherData.current.weather_icons });
+        ctx.replyWithPhoto({ url: response.data.current.weather_icons });
       })
       .catch((error) => {
         console.log(`Some err: ${error}`);
@@ -64,6 +77,5 @@ Wind speed: ${weatherData.current.wind_speed} m/s
   }
 });
 
-bot.hears('hi', (ctx) => ctx.reply('Hey there'));
 bot.launch();
 console.log('Bot is started...');
